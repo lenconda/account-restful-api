@@ -30,13 +30,14 @@
         "test:e2e": "jest --config ./test/jest-e2e.json"
     },
     "dependencies": {
+        "@fusionauth/typescript-client": "^1.32.1",
         "@nestjs/common": "^7.6.13",
         "@nestjs/config": "^0.5.0",
         "@nestjs/core": "^7.6.13",
         "@nestjs/passport": "^7.1.0",
         "@nestjs/platform-express": "^7.6.5",
+        "@nestjs/serve-static": "^2.2.2",
         "@nestjs/typeorm": "^7.1.5",
-        "auth0": "^2.37.0",
         "axios": "^0.24.0",
         "crypto": "^1.0.1",
         "dotenv": "^8.6.0",
@@ -51,6 +52,7 @@
         "rimraf": "^3.0.2",
         "rxjs": "^6.6.3",
         "typeorm": "^0.2.29",
+        "url-join": "^4.0.1",
         "url-toolkit": "^2.2.3",
         "yup": "^0.32.11"
     },
@@ -68,6 +70,7 @@
         "@types/node": "^14.6.0",
         "@types/passport-jwt": "^3.0.3",
         "@types/supertest": "^2.0.10",
+        "@types/url-join": "^4.0.1",
         "@typescript-eslint/eslint-plugin": "^4.15.2",
         "@typescript-eslint/parser": "^4.15.2",
         "eslint": "^7.20.0",

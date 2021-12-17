@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { Auth0Service } from 'src/auth0/auth0.service';
+import {
+    Injectable,
+    InternalServerErrorException,
+} from '@nestjs/common';
+import {
+    ERR_AUTH_CLIENT_NOT_FOUND,
+} from 'src/app.constants';
+import { Oauth2Service } from 'src/oauth2/oauth2.service';
 
 @Injectable()
 export class VendorService {
     public constructor(
-        private readonly auth0Service: Auth0Service,
+        private readonly oauth2Service: Oauth2Service,
     ) {}
 
     /**
@@ -13,23 +19,39 @@ export class VendorService {
      * @param {string} clientId auth client id
      * @returns {Promise<TokenResponse>} refresh token response
      */
-    public async getRefreshedToken(refreshToken: string, clientId?: string) {
-        const authenticationClient = clientId
-            ? await this.auth0Service.createAuthenticationClient(clientId)
-            : this.auth0Service.authenticationClient;
+    public async getRefreshedToken(refreshToken: string, clientId: string) {
+        const oauth2Client = this.oauth2Service.getClient();
 
-        if (
-            !refreshToken ||
-                !authenticationClient ||
-                !authenticationClient.oauth
-        ) {
-            return {};
+        const clientSecret = await oauth2Client
+            .retrieveApplication(clientId)
+            .then((response) => response.response?.application?.oauthConfiguration?.clientSecret);
+
+
+        if (!clientSecret) {
+            throw new InternalServerErrorException(ERR_AUTH_CLIENT_NOT_FOUND);
         }
 
-        const codeGrantResult = await authenticationClient?.oauth.refreshToken({
-            refresh_token: refreshToken,
-        });
+        const result = oauth2Client
+            .exchangeRefreshTokenForAccessToken(
+                refreshToken,
+                clientId,
+                clientSecret,
+                'offline_access',
+                null,
+            )
+            .then((response) => {
+                const {
+                    access_token,
+                    refresh_token,
+                    expires_in,
+                } = response.response;
+                return {
+                    access_token,
+                    refresh_token,
+                    expires_in,
+                };
+            });
 
-        return codeGrantResult;
+        return result;
     }
 }

@@ -16,17 +16,20 @@ import {
 } from 'src/app.constants';
 import { ConfigService } from '@nestjs/config';
 import * as yup from 'yup';
-import { Auth0Service } from 'src/auth0/auth0.service';
 import axios from 'axios';
 import * as qs from 'qs';
 import { URL } from 'url';
+import { Oauth2Service } from 'src/oauth2/oauth2.service';
+import * as fs from 'fs-extra';
+import * as jwt from 'jsonwebtoken';
+import * as urlJoin from 'url-join/lib/url-join';
 
 interface CallbackStateSchema {
     clientId: string;
     vendor?: {
         origin?: string;
-        pathname?: string;
-        data?: string;
+        check_in_path?: string;
+        checked_in_redirect_path?: string;
     };
 }
 
@@ -35,8 +38,31 @@ export class AuthService {
     public constructor(
         private readonly utilService: UtilService,
         private readonly configService: ConfigService,
-        private readonly auth0Service: Auth0Service,
+        private readonly oauth2Service: Oauth2Service,
     ) {}
+
+    public signAccountCenterToken(openId: string) {
+        const privateKey = fs.readFileSync(this.configService.get('sign.privateKeyPathname'));
+
+        if (!openId || !privateKey) {
+            return null;
+        }
+
+        const token = jwt.sign(
+            {
+                sub: openId,
+            },
+            privateKey,
+            {
+                algorithm: 'RS256',
+                audience: this.configService.get('auth.audience'),
+                expiresIn: this.configService.get('sign.expiration'),
+                issuer: this.configService.get('sign.issuer'),
+            },
+        );
+
+        return token;
+    }
 
     /**
      * use Auth0 access token to generate a new token that can be recognized
@@ -50,14 +76,16 @@ export class AuthService {
         }
 
         const [, payload] = token.split('.');
-        let audience: string;
+        let audience: string | string[];
 
         if (!payload) {
             throw new InternalServerErrorException(ERR_SIGN_PAYLOAD_NOT_FOUND);
         }
 
         try {
-            const { aud } = JSON.parse(Buffer.from(payload, 'base64').toString());
+            const {
+                aud,
+            } = JSON.parse(Buffer.from(payload, 'base64').toString()) as jwt.JwtPayload;
             audience = aud;
         } catch (e) {
             throw new InternalServerErrorException(ERR_AUTH_TOKEN_PARSE_ERROR);
@@ -65,16 +93,14 @@ export class AuthService {
 
         const {
             sub: openId,
-        } = await this.utilService.validateAuth0AccessToken(token, audience);
+        } = await this.oauth2Service.validateOauth2AccessToken(token, audience);
 
         if (!openId) {
             throw new InternalServerErrorException(ERR_AUTH_OPEN_ID_INVALID);
         }
 
-        console.log('LENCONDA', this.configService.get('sign.expiration'));
-
         return {
-            token: this.utilService.signAccountCenterToken(openId),
+            token: this.signAccountCenterToken(openId),
             expiresIn: this.configService.get('sign.expiration'),
         };
     }
@@ -85,7 +111,7 @@ export class AuthService {
         }
 
         return {
-            token: this.utilService.signAccountCenterToken(openId),
+            token: this.signAccountCenterToken(openId),
             expiresIn: this.configService.get('sign.expiration'),
         };
     }
@@ -93,11 +119,10 @@ export class AuthService {
     public async authenticationHandler(code: string, state: string) {
         const stateSchema = yup.object().shape({
             clientId: yup.string().required(),
-            redirectUri: yup.string().required(),
             vendor: yup.object().shape({
                 origin: yup.string().optional(),
-                pathname: yup.string().optional(),
-                data: yup.string().optional(),
+                check_in_path: yup.string().optional(),
+                checked_in_redirect_path: yup.string().optional(),
             }).optional(),
         });
 
@@ -109,8 +134,9 @@ export class AuthService {
         let stateParams: CallbackStateSchema = {
             clientId: defaultClientId,
             vendor: {
-                origin: this.configService.get('sign.issuer'),
-                pathname: '/vendor/check_in',
+                origin: this.configService.get('app.origin'),
+                check_in_path: '/endpoints/check_in',
+                checked_in_redirect_path: '/',
             },
         };
 
@@ -131,13 +157,16 @@ export class AuthService {
         if (stateParams.clientId === defaultClientId) {
             clientSecret = this.configService.get('auth.clientSecret');
         } else {
-            const {
-                client_secret,
-            } = await this.auth0Service.managementClient.getClient({
-                client_id: stateParams.clientId,
-            });
+            const application = await this.oauth2Service
+                .getClient()
+                .retrieveApplication(stateParams.clientId)
+                .then((response) => response.response?.application);
 
-            clientSecret = client_secret;
+            if (!application) {
+                throw new InternalServerErrorException(ERR_AUTH_CLIENT_NOT_FOUND);
+            }
+
+            clientSecret = application?.oauthConfiguration?.clientSecret;
         }
 
         if (!clientSecret) {
@@ -148,13 +177,13 @@ export class AuthService {
             const {
                 data: oauthTokenResponseData,
             } = await axios.post(
-                `https://${this.configService.get('auth.domain')}/oauth/token`,
+                `https://${this.configService.get('auth.domain')}${this.configService.get('auth.tokenEndpoint')}`,
                 qs.stringify(this.utilService.transformDTOToDAO({
                     code,
                     clientId: stateParams.clientId,
                     clientSecret,
                     grantType: 'authorization_code',
-                    redirectUri: `${this.configService.get('auth.audience')}auth/callback`,
+                    redirectUri: this.configService.get('auth.defaultRedirectUri'),
                 })),
                 {
                     headers: {
@@ -164,13 +193,16 @@ export class AuthService {
                 },
             );
 
-            const callbackURLParser = new URL(stateParams.vendor.origin);
-            callbackURLParser.pathname = _.get(stateParams, 'vendor.pathname') || '';
+            const callbackURLParser = new URL(
+                urlJoin(
+                    'https://' + stateParams.vendor.origin,
+                    stateParams.vendor.check_in_path,
+                ),
+            );
             callbackURLParser.search = '?' + qs.stringify({
-                data: stateParams.vendor.data,
                 ...oauthTokenResponseData,
+                return_to: stateParams.vendor.checked_in_redirect_path,
             });
-
             return callbackURLParser.toString();
         } catch (e) {
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
