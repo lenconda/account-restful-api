@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
 import { CaseStyleType } from 'src/app.interface';
+import * as querystring from 'querystring';
+import * as md5 from 'blueimp-md5/js/md5';
 
 type DataType = Array<any> | Object | string;
 
@@ -67,5 +69,22 @@ export class UtilService {
 
     public transformDTOToDAO<DTOType, DAOType>(dtoData: Partial<DTOType>): DAOType {
         return this.transformCaseStyle<DTOType, DAOType>(dtoData, 'snake');
+    }
+
+    public getGravatarUrl(email: string, parameters = {}) {
+        const getQueryString = (parameters: Record<string, any>) => {
+            let result = '';
+            const convertedQueryString = querystring.stringify(parameters);
+
+            if (convertedQueryString !== '') {
+                result = '?' + convertedQueryString;
+            }
+
+            return result;
+        };
+
+        const query = getQueryString(parameters);
+
+        return `https://sdn.geekzu.org/avatar/${md5(email.toLowerCase().trim())}${query}`;
     }
 }

@@ -17,6 +17,7 @@ import {
 import * as fs from 'fs-extra';
 import { Oauth2Service } from 'src/oauth2/oauth2.service';
 import { UserService } from 'src/user/user.service';
+import { UtilService } from 'src/util/util.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(BaseStrategy) {
@@ -24,6 +25,7 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
         private readonly configService: ConfigService,
         private readonly oauth2Service: Oauth2Service,
         private readonly userService: UserService,
+        private readonly utilService: UtilService,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -55,6 +57,12 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
         }
 
         const currentUserDTO = this.userService.getUserDTOFromOAuth2ServerResponse(userInfo);
-        return currentUserDTO;
+
+        return {
+            ...currentUserDTO,
+            picture: userInfo.email
+                ? this.utilService.getGravatarUrl(userInfo.email)
+                : null,
+        };
     }
 }
