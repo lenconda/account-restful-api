@@ -3,28 +3,34 @@ import {
     Get,
     Inject,
     Query,
-    Req,
     Res,
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-    Response,
-    Request,
-} from 'express';
+import { Response } from 'express';
 import { UserDTO } from 'src/user/dto/user.dto';
 import { CurrentUser } from 'src/user/user.decorator';
 import { AuthService } from './auth.service';
+import * as qs from 'qs';
 
 @Controller('/auth')
 export class AuthController {
     @Inject()
     protected authService: AuthService;
 
-    @Get('/exchange_token')
-    public async getExchangeAccessToken(@Req() request: Request) {
-        const jwtContent = request.headers.authorization.replace('Bearer ', '');
-        return await this.authService.getExchangedAccessToken(jwtContent);
+    @Get('/handover')
+    public async getExchangeAccessToken(
+        @Query('token') token: string,
+        @Res() response: Response,
+    ) {
+        const {
+            expiresIn,
+            token: exchangedToken,
+        } = await this.authService.getExchangedAccessToken(token);
+        return response.redirect(`/endpoints/check_in?${qs.stringify({
+            access_token: exchangedToken,
+            expires_in: expiresIn,
+        })}`);
     }
 
     @UseGuards(AuthGuard())
