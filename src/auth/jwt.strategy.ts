@@ -58,11 +58,6 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
 
         const currentUserDTO = this.userService.getUserDTOFromOAuth2ServerResponse(userInfo);
 
-        return {
-            ...currentUserDTO,
-            picture: userInfo.email
-                ? this.utilService.getGravatarUrl(userInfo.email)
-                : null,
-        };
+        return currentUserDTO;
     }
 }

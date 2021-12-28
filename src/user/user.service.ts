@@ -6,10 +6,14 @@ import {
 import * as _ from 'lodash';
 import { UserDTO } from './dto/user.dto';
 import { Oauth2Service } from 'src/oauth2/oauth2.service';
-import { UserRequest } from '@fusionauth/typescript-client';
+import {
+    UserRequest,
+} from '@fusionauth/typescript-client';
 import {
     ERR_FORGOT_PASSWORD_FLOW_FAILED,
 } from 'src/app.constants';
+import { UtilService } from 'src/util/util.service';
+import { User } from 'auth0';
 
 @Injectable()
 export class UserService {
@@ -28,6 +32,7 @@ export class UserService {
 
     public constructor(
         private readonly oauth2Service: Oauth2Service,
+        private readonly utilService: UtilService,
     ) {}
 
     /**
@@ -88,7 +93,7 @@ export class UserService {
         };
     }
 
-    public getUserDTOFromOAuth2ServerResponse(userInfo: Object) {
+    public getUserDTOFromOAuth2ServerResponse(userInfo: User) {
         return Object.keys(this.allowedUserInfoKeyList).reduce((result, currentKey) => {
             const currentKeyName = this.allowedUserInfoKeyList[currentKey];
             const currentValue = userInfo[currentKey];
@@ -96,6 +101,10 @@ export class UserService {
                 result[currentKeyName] = currentValue;
             }
             return result;
-        }, {} as UserDTO);
+        }, {
+            picture: userInfo.email
+                ? this.utilService.getGravatarUrl(userInfo.email)
+                : null,
+        } as UserDTO);
     }
 }

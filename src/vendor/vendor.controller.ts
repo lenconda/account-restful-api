@@ -3,6 +3,7 @@ import {
     Post,
     Body,
     Get,
+    Query,
 } from '@nestjs/common';
 import { VendorService } from './vendor.service';
 
@@ -20,7 +21,11 @@ export class VendorController {
         return await this.vendorService.getRefreshedToken(refreshToken, clientId);
     }
 
-    // TODO
-    @Get('/check_in')
-    public async checkIn() {}
+    @Get('/profile')
+    public async getVendorUserProfile(
+        @Query('id') id: string,
+        @Query('key') apiKey: string,
+    ) {
+        return await this.vendorService.getUserDTOFromVendor(id, apiKey);
+    }
 }
