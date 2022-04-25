@@ -177,7 +177,10 @@ export class AuthService {
             const {
                 data: oauthTokenResponseData,
             } = await axios.post(
-                `https://${this.configService.get('auth.domain')}${this.configService.get('auth.tokenEndpoint')}`,
+                this.configService.get('auth.protocol').toLowerCase() +
+                '://' +
+                this.configService.get('auth.domain') +
+                this.configService.get('auth.tokenEndpoint'),
                 qs.stringify(this.utilService.transformDTOToDAO({
                     code,
                     clientId: stateParams.clientId,

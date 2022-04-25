@@ -63,7 +63,7 @@ export class VendorService {
     public async getUserDTOFromVendor(id: string, apiKey: string) {
         const client = new FusionAuthClient(
             apiKey,
-            `https://${this.configService.get('auth.domain')}`,
+            `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,
         );
 
         const userInfo = await client

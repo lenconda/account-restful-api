@@ -16,7 +16,7 @@ export class Oauth2Service {
     ) {
         this.client = new FusionAuthClient(
             this.configService.get('auth.apiKey'),
-            `https://${this.configService.get('auth.domain')}`,
+            `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,
         );
     }
 
@@ -33,7 +33,7 @@ export class Oauth2Service {
                 rateLimit: true,
                 cache: true,
                 jwksRequestsPerMinute: 5,
-                jwksUri: `https://${this.configService.get('auth.domain')}/.well-known/jwks.json`,
+                jwksUri: `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}/.well-known/jwks.json`,
             });
 
             jwt.verify(
