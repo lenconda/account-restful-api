@@ -28,6 +28,7 @@ export class UserService {
         verified: 'verified',
         insertInstant: 'createdAt',
         lastUpdateInstant: 'updatedAt',
+        imageUrl: 'picture',
     };
 
     public constructor(
@@ -50,14 +51,21 @@ export class UserService {
                 'middleName',
                 'lastName',
                 'email',
+                'picture',
             ],
         );
+
+        const {
+            picture: imageUrl,
+            ...otherUserPatchData
+        } = userPatchData;
 
         const result = await this.oauth2Service
             .getClient()
             .updateUser(openId, {
                 user: {
-                    ...userPatchData,
+                    ...otherUserPatchData,
+                    ...(imageUrl ? { imageUrl } : {}),
                     email: userPatchData.email || email,
                 },
                 skipVerification: email === userPatchData.email,
@@ -94,17 +102,19 @@ export class UserService {
     }
 
     public getUserDTOFromOAuth2ServerResponse(userInfo: User) {
-        return Object.keys(this.allowedUserInfoKeyList).reduce((result, currentKey) => {
+        const user = Object.keys(this.allowedUserInfoKeyList).reduce((result, currentKey) => {
             const currentKeyName = this.allowedUserInfoKeyList[currentKey];
             const currentValue = userInfo[currentKey];
             if (!_.isNull(currentValue) || !_.isUndefined(currentValue)) {
                 result[currentKeyName] = currentValue;
             }
             return result;
-        }, {
-            picture: userInfo.email
-                ? this.utilService.getGravatarUrl(userInfo.email)
-                : null,
-        } as UserDTO);
+        }, {} as UserDTO);
+
+        if (!user.picture) {
+            user.picture = this.utilService.getGravatarUrl(user.email);
+        }
+
+        return user;
     }
 }

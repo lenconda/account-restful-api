@@ -104,12 +104,19 @@ export class VendorService {
                 'middleName',
                 'lastName',
                 'email',
+                'picture',
             ],
         );
 
+        const {
+            picture: imageUrl,
+            ...otherUserPatchData
+        } = userPatchData;
+
         const result = await client.updateUser(openId, {
             user: {
-                ...userPatchData,
+                ...otherUserPatchData,
+                ...(imageUrl ? { imageUrl } : {}),
                 email: userPatchData.email || email,
             },
             skipVerification: email === userPatchData.email,
