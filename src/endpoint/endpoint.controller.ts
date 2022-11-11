@@ -5,6 +5,7 @@ import {
     Get,
     Query,
     Patch,
+    Param,
 } from '@nestjs/common';
 import { UserDTO } from 'src/user/dto/user.dto';
 import { EndpointService } from './endpoint.service';
@@ -15,6 +16,14 @@ export class EndpointController {
         private readonly endpointService: EndpointService,
     ) {}
 
+    @Get('/handover/:client_id?')
+    public async handoverAuthentication(
+        @Query('code') code: string,
+        @Param('client_id') clientId?: string,
+    ) {
+        return {};
+    }
+
     @Post('/token/refresh')
     public async getRefreshedToken(
         @Body('refresh_token') refreshToken: string,
@@ -24,7 +33,7 @@ export class EndpointController {
     }
 
     @Get('/profile')
-    public async getClientProfile(
+    public async getUserProfileForClient(
         @Query('id') id: string,
         @Query('key') apiKey: string,
     ) {
@@ -32,13 +41,13 @@ export class EndpointController {
     }
 
     @Patch('/profile')
-    public async updateUserProfile(
+    public async updateUserProfileForClient(
         @Body('open_id') openId: string,
         @Body('api_key') apiKey: string,
         @Body('email') email: string,
         @Body('updates') updates: Partial<Omit<UserDTO, 'id'>>,
     ) {
-        return await this.endpointService.updateUserProfile({
+        return await this.endpointService.updateUserProfileForClient({
             openId,
             apiKey,
             updates,

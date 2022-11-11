@@ -9,21 +9,13 @@ import {
 } from '@nestjs/common';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
-import {
-    catchError,
-    map,
-} from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { ERR_HTTP_SERVER_ERROR } from './app.constants';
-import { UtilService } from './util/util.service';
 
 export type Response = Record<string, any>;
 
 @Injectable()
 export class AppInterceptor<T> implements NestInterceptor<T, Response> {
-    public constructor(
-        private readonly utilService: UtilService,
-    ) {}
-
     public async intercept(
         context: ExecutionContext,
         next: CallHandler,
@@ -38,9 +30,6 @@ export class AppInterceptor<T> implements NestInterceptor<T, Response> {
                 } else {
                     throw new InternalServerErrorException(ERR_HTTP_SERVER_ERROR, e.message || e.toString());
                 }
-            }),
-            map((data) => {
-                return this.utilService.transformDTOToDAO(data);
             }),
         );
     }

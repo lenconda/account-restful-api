@@ -114,7 +114,7 @@ export class Oauth2Service {
                 '://' +
                 this.configService.get('auth.domain') +
                 this.configService.get('auth.tokenEndpoint'),
-                qs.stringify(this.utilService.transformDTOToDAO({
+                qs.stringify(this.utilService.transformSnakeToCamel({
                     code,
                     clientId,
                     clientSecret,

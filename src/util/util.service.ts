@@ -7,14 +7,14 @@ import { CaseTransformerService } from '@pugio/case-transformer';
 @Injectable()
 export class UtilService {
     public transformCaseStyle: typeof CaseTransformerService.prototype.transformCaseStyle;
-    public transformDAOToDTO: typeof CaseTransformerService.prototype.transformDAOToDTO;
-    public transformDTOToDAO: typeof CaseTransformerService.prototype.transformDTOToDAO;
+    public transformCamelToSnake: typeof CaseTransformerService.prototype.transformDAOToDTO;
+    public transformSnakeToCamel: typeof CaseTransformerService.prototype.transformDTOToDAO;
 
     public constructor() {
         const transformerService = new CaseTransformerService();
         this.transformCaseStyle = transformerService.transformCaseStyle.bind(this);
-        this.transformDAOToDTO = transformerService.transformDAOToDTO.bind(this);
-        this.transformDTOToDAO = transformerService.transformDTOToDAO.bind(this);
+        this.transformCamelToSnake = transformerService.transformDAOToDTO.bind(this);
+        this.transformSnakeToCamel = transformerService.transformDTOToDAO.bind(this);
     }
 
     public getGravatarUrl(email: string, parameters = {}) {

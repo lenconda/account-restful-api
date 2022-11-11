@@ -21,29 +21,6 @@ export class AuthService {
         private readonly oauth2Service: Oauth2Service,
     ) {}
 
-    public signAccountCenterToken(openId: string) {
-        const privateKey = fs.readFileSync(this.configService.get('sign.privateKeyPathname'));
-
-        if (!openId || !privateKey) {
-            return null;
-        }
-
-        const token = jwt.sign(
-            {
-                sub: openId,
-            },
-            privateKey,
-            {
-                algorithm: 'RS256',
-                audience: this.configService.get('auth.audience'),
-                expiresIn: this.configService.get('sign.expiration'),
-                issuer: this.configService.get('sign.issuer'),
-            },
-        );
-
-        return token;
-    }
-
     /**
      * use Auth0 access token to generate a new token that can be recognized
      * by Lenconda Account Center
@@ -80,7 +57,7 @@ export class AuthService {
         }
 
         return {
-            token: this.signAccountCenterToken(openId),
+            token: this.signLTACToken(openId),
             expiresIn: this.configService.get('sign.expiration'),
         };
     }
@@ -91,8 +68,31 @@ export class AuthService {
         }
 
         return {
-            token: this.signAccountCenterToken(openId),
+            token: this.signLTACToken(openId),
             expiresIn: this.configService.get('sign.expiration'),
         };
+    }
+
+    private signLTACToken(openId: string) {
+        const privateKey = fs.readFileSync(this.configService.get('sign.privateKeyPathname'));
+
+        if (!openId || !privateKey) {
+            return null;
+        }
+
+        const token = jwt.sign(
+            {
+                sub: openId,
+            },
+            privateKey,
+            {
+                algorithm: 'RS256',
+                audience: this.configService.get('auth.audience'),
+                expiresIn: this.configService.get('sign.expiration'),
+                issuer: this.configService.get('sign.issuer'),
+            },
+        );
+
+        return token;
     }
 }

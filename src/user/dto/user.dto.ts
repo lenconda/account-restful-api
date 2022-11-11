@@ -1,12 +1,3 @@
-export class UserDTO {
-    public id: number;
-    public openId: string;
-    public email: string;
-    public picture: string;
-    public fullName: string;
-    public firstName: string;
-    public middleName: string;
-    public lastName: string;
-    public active: boolean;
-    public verified: boolean;
-}
+import { User } from '@fusionauth/typescript-client';
+
+export interface UserDTO extends User {}

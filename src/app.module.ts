@@ -1,17 +1,12 @@
 import * as path from 'path';
 import { Module } from '@nestjs/common';
-import {
-    ConfigModule,
-    ConfigService,
-} from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AppInterceptor } from './app.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { getMetadataArgsStorage } from 'typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilModule } from './util/util.module';
 import { EndpointModule } from './endpoint/endpoint.module';
 import { Oauth2Module } from './oauth2/oauth2.module';
@@ -35,20 +30,6 @@ import signConfig from './config/sign.config';
         }),
         AuthModule,
         UserModule,
-        TypeOrmModule.forRootAsync({
-            imports: [ConfigModule],
-            useFactory: async (config: ConfigService) => {
-                return {
-                    ...(config.get('db') as Record<string, any>),
-                    entities: getMetadataArgsStorage().tables.map(
-                        (table) => table.target,
-                    ),
-                    keepConnectionAlive: true,
-                    synchronize: true,
-                };
-            },
-            inject: [ConfigService],
-        }),
         UtilModule,
         EndpointModule,
         Oauth2Module,

@@ -7,14 +7,11 @@ import {
     InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-    ERR_AUTH_CLIENT_NOT_FOUND,
-} from 'src/app.constants';
+import { ERR_AUTH_CLIENT_NOT_FOUND } from 'src/app.constants';
 import { Oauth2Service } from 'src/oauth2/oauth2.service';
 import { UserDTO } from 'src/user/dto/user.dto';
 import { UserService } from 'src/user/user.service';
 import * as _ from 'lodash';
-import { UtilService } from 'src/util/util.service';
 
 @Injectable()
 export class EndpointService {
@@ -22,7 +19,6 @@ export class EndpointService {
         private readonly oauth2Service: Oauth2Service,
         private readonly configService: ConfigService,
         private readonly userService: UserService,
-        private readonly utilService: UtilService,
     ) {}
 
     /**
@@ -80,7 +76,7 @@ export class EndpointService {
         return this.userService.getUserDTOFromOAuth2ServerResponse(userInfo);
     }
 
-    public async updateUserProfile({
+    public async updateUserProfileForClient({
         openId,
         updates,
         apiKey,
@@ -89,27 +85,27 @@ export class EndpointService {
         email: string;
         apiKey: string;
         openId: string;
-        updates: Partial<Omit<UserDTO, 'id'>>;
+        updates: UserDTO;
     }) {
         const client = new FusionAuthClient(
             apiKey,
             `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,
         );
 
-        const userPatchData: Partial<Omit<UserDTO, 'id'>> = _.pick(
-            this.utilService.transformDAOToDTO(updates),
+        const userPatchData: UserDTO = _.pick(
+            updates,
             [
                 'fullName',
                 'firstName',
                 'middleName',
                 'lastName',
                 'email',
-                'picture',
+                'imageUrl',
             ],
         );
 
         const {
-            picture: imageUrl,
+            imageUrl,
             ...otherUserPatchData
         } = userPatchData;
 

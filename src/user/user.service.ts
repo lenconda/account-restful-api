@@ -6,14 +6,9 @@ import {
 import * as _ from 'lodash';
 import { UserDTO } from './dto/user.dto';
 import { Oauth2Service } from 'src/oauth2/oauth2.service';
-import {
-    UserRequest,
-} from '@fusionauth/typescript-client';
-import {
-    ERR_FORGOT_PASSWORD_FLOW_FAILED,
-} from 'src/app.constants';
+import { UserRequest } from '@fusionauth/typescript-client';
+import { ERR_FORGOT_PASSWORD_FLOW_FAILED } from 'src/app.constants';
 import { UtilService } from 'src/util/util.service';
-import { User } from 'auth0';
 
 @Injectable()
 export class UserService {
@@ -28,7 +23,7 @@ export class UserService {
         verified: 'verified',
         insertInstant: 'createdAt',
         lastUpdateInstant: 'updatedAt',
-        imageUrl: 'picture',
+        imageUrl: 'imageUrl',
     };
 
     public constructor(
@@ -51,21 +46,15 @@ export class UserService {
                 'middleName',
                 'lastName',
                 'email',
-                'picture',
+                'imageUrl',
             ],
         );
-
-        const {
-            picture: imageUrl,
-            ...otherUserPatchData
-        } = userPatchData;
 
         const result = await this.oauth2Service
             .getClient()
             .updateUser(openId, {
                 user: {
-                    ...otherUserPatchData,
-                    ...(imageUrl ? { imageUrl } : {}),
+                    ...userPatchData,
                     email: userPatchData.email || email,
                 },
                 skipVerification: email === userPatchData.email,
@@ -101,7 +90,7 @@ export class UserService {
         };
     }
 
-    public getUserDTOFromOAuth2ServerResponse(userInfo: User) {
+    public getUserDTOFromOAuth2ServerResponse(userInfo: UserDTO) {
         const user = Object.keys(this.allowedUserInfoKeyList).reduce((result, currentKey) => {
             const currentKeyName = this.allowedUserInfoKeyList[currentKey];
             const currentValue = userInfo[currentKey];
@@ -111,8 +100,8 @@ export class UserService {
             return result;
         }, {} as UserDTO);
 
-        if (!user.picture) {
-            user.picture = this.utilService.getGravatarUrl(user.email);
+        if (!user.imageUrl) {
+            user.imageUrl = this.utilService.getGravatarUrl(user.email);
         }
 
         return user;
