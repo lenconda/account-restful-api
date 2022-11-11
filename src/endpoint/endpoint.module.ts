@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { VendorService } from './vendor.service';
-import { VendorController } from './vendor.controller';
+import { EndpointService } from './endpoint.service';
+import { EndpointController } from './endpoint.controller';
 import { Oauth2Module } from 'src/oauth2/oauth2.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from 'src/user/user.module';
@@ -11,8 +11,8 @@ import { UserModule } from 'src/user/user.module';
         ConfigModule,
         UserModule,
     ],
-    providers: [VendorService],
-    controllers: [VendorController],
-    exports: [VendorService],
+    providers: [EndpointService],
+    controllers: [EndpointController],
+    exports: [EndpointService],
 })
-export class VendorModule {}
+export class EndpointModule {}

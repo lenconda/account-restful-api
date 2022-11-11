@@ -26,7 +26,7 @@ export class AuthController {
         const {
             expiresIn,
             token: exchangedToken,
-        } = await this.authService.getExchangedAccessToken(token);
+        } = await this.authService.signLTACAccessToken(token);
         return response.redirect(`/endpoints/check_in?${qs.stringify({
             access_token: exchangedToken,
             expires_in: expiresIn,
@@ -34,18 +34,8 @@ export class AuthController {
     }
 
     @UseGuards(AuthGuard())
-    @Get('/refresh_token')
+    @Get('/token/refresh')
     public refreshToken(@CurrentUser() user: UserDTO) {
         return this.authService.generateNewToken(user.openId);
-    }
-
-    @Get('/callback')
-    public async handleAuthenticationCallback(
-        @Query('code') code: string,
-        @Query('state') state: string,
-        @Res() response: Response,
-    ) {
-        const redirectURI = await this.authService.authenticationHandler(code, state);
-        return response.redirect(redirectURI);
     }
 }

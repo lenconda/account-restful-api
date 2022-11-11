@@ -17,7 +17,7 @@ import * as _ from 'lodash';
 import { UtilService } from 'src/util/util.service';
 
 @Injectable()
-export class VendorService {
+export class EndpointService {
     public constructor(
         private readonly oauth2Service: Oauth2Service,
         private readonly configService: ConfigService,
@@ -67,7 +67,7 @@ export class VendorService {
         return result;
     }
 
-    public async getUserDTOFromVendor(id: string, apiKey: string) {
+    public async getUserProfileForClient(id: string, apiKey: string) {
         const client = new FusionAuthClient(
             apiKey,
             `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,

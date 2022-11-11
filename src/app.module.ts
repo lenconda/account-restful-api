@@ -13,7 +13,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { getMetadataArgsStorage } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UtilModule } from './util/util.module';
-import { VendorModule } from './vendor/vendor.module';
+import { EndpointModule } from './endpoint/endpoint.module';
 import { Oauth2Module } from './oauth2/oauth2.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
@@ -50,7 +50,7 @@ import signConfig from './config/sign.config';
             inject: [ConfigService],
         }),
         UtilModule,
-        VendorModule,
+        EndpointModule,
         Oauth2Module,
         ServeStaticModule.forRoot({
             rootPath: path.resolve(__dirname, '../static'),

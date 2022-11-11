@@ -1,7 +1,9 @@
 import {
     Body,
     Controller,
+    Get,
     Post,
+    Query,
 } from '@nestjs/common';
 import { Oauth2Service } from './oauth2.service';
 
@@ -17,5 +19,13 @@ export class Oauth2Controller {
         @Body('audience') audience: string | string[],
     ) {
         return await this.oauth2Service.validateOauth2AccessToken(token, audience);
+    }
+
+    @Get('/exchange')
+    public async handleAuthenticationCallback(
+        @Query('code') code: string,
+        @Query('client_id') clientId: string,
+    ) {
+        return await this.oauth2Service.exchangeAccessTokenFromCode(code, clientId);
     }
 }

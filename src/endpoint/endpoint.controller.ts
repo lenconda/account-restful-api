@@ -7,28 +7,28 @@ import {
     Patch,
 } from '@nestjs/common';
 import { UserDTO } from 'src/user/dto/user.dto';
-import { VendorService } from './vendor.service';
+import { EndpointService } from './endpoint.service';
 
-@Controller('/vendor')
-export class VendorController {
+@Controller('/endpoint')
+export class EndpointController {
     public constructor(
-        private readonly vendorService: VendorService,
+        private readonly endpointService: EndpointService,
     ) {}
 
-    @Post('/refresh_token')
+    @Post('/token/refresh')
     public async getRefreshedToken(
         @Body('refresh_token') refreshToken: string,
         @Body('client_id') clientId: string,
     ) {
-        return await this.vendorService.getRefreshedToken(refreshToken, clientId);
+        return await this.endpointService.getRefreshedToken(refreshToken, clientId);
     }
 
     @Get('/profile')
-    public async getVendorUserProfile(
+    public async getClientProfile(
         @Query('id') id: string,
         @Query('key') apiKey: string,
     ) {
-        return await this.vendorService.getUserDTOFromVendor(id, apiKey);
+        return await this.endpointService.getUserProfileForClient(id, apiKey);
     }
 
     @Patch('/profile')
@@ -38,7 +38,7 @@ export class VendorController {
         @Body('email') email: string,
         @Body('updates') updates: Partial<Omit<UserDTO, 'id'>>,
     ) {
-        return await this.vendorService.updateUserProfile({
+        return await this.endpointService.updateUserProfile({
             openId,
             apiKey,
             updates,
