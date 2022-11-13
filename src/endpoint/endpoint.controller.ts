@@ -4,10 +4,8 @@ import {
     Body,
     Get,
     Query,
-    Patch,
     Param,
 } from '@nestjs/common';
-import { UserDTO } from 'src/user/dto/user.dto';
 import { EndpointService } from './endpoint.service';
 
 @Controller('/endpoint')
@@ -38,20 +36,5 @@ export class EndpointController {
         @Query('key') apiKey: string,
     ) {
         return await this.endpointService.getUserProfileForClient(id, apiKey);
-    }
-
-    @Patch('/profile')
-    public async updateUserProfileForClient(
-        @Body('open_id') openId: string,
-        @Body('api_key') apiKey: string,
-        @Body('email') email: string,
-        @Body('updates') updates: Partial<Omit<UserDTO, 'id'>>,
-    ) {
-        return await this.endpointService.updateUserProfileForClient({
-            openId,
-            apiKey,
-            updates,
-            email,
-        });
     }
 }

@@ -1,7 +1,4 @@
-import {
-    FusionAuthClient,
-    UserRequest,
-} from '@fusionauth/typescript-client';
+import { FusionAuthClient } from '@fusionauth/typescript-client';
 import {
     Injectable,
     InternalServerErrorException,
@@ -9,7 +6,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ERR_AUTH_CLIENT_NOT_FOUND } from 'src/app.constants';
 import { Oauth2Service } from 'src/oauth2/oauth2.service';
-import { UserDTO } from 'src/user/dto/user.dto';
 import { UserService } from 'src/user/user.service';
 import * as _ from 'lodash';
 
@@ -74,50 +70,5 @@ export class EndpointService {
             .then((response) => response.response.user);
 
         return this.userService.getUserDTOFromOAuth2ServerResponse(userInfo);
-    }
-
-    public async updateUserProfileForClient({
-        openId,
-        updates,
-        apiKey,
-        email,
-    }: {
-        email: string;
-        apiKey: string;
-        openId: string;
-        updates: UserDTO;
-    }) {
-        const client = new FusionAuthClient(
-            apiKey,
-            `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,
-        );
-
-        const userPatchData: UserDTO = _.pick(
-            updates,
-            [
-                'fullName',
-                'firstName',
-                'middleName',
-                'lastName',
-                'email',
-                'imageUrl',
-            ],
-        );
-
-        const {
-            imageUrl,
-            ...otherUserPatchData
-        } = userPatchData;
-
-        const result = await client.updateUser(openId, {
-            user: {
-                ...otherUserPatchData,
-                ...(imageUrl ? { imageUrl } : {}),
-                email: userPatchData.email || email,
-            },
-            skipVerification: email === userPatchData.email,
-        } as UserRequest).then((response) => response.response?.user);
-
-        return result;
     }
 }
