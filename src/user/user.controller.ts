@@ -31,7 +31,7 @@ export class UserController {
     ) {
         return await this.userService.updateUserInformation(
             user.email,
-            user.openId,
+            user.id,
             userInformation,
         );
     }

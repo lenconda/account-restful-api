@@ -9,7 +9,6 @@ import { AppInterceptor } from './app.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UtilModule } from './util/util.module';
 import { EndpointModule } from './endpoint/endpoint.module';
-import { Oauth2Module } from './oauth2/oauth2.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
 // Application configs
@@ -32,7 +31,6 @@ import signConfig from './config/sign.config';
         UserModule,
         UtilModule,
         EndpointModule,
-        Oauth2Module,
         ServeStaticModule.forRoot({
             rootPath: path.resolve(__dirname, '../static'),
             serveRoot: '/endpoints',

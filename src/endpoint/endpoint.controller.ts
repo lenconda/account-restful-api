@@ -22,12 +22,20 @@ export class EndpointController {
         return {};
     }
 
-    @Post('/token/refresh')
-    public async getRefreshedToken(
-        @Body('refresh_token') refreshToken: string,
-        @Body('client_id') clientId: string,
+    @Post('/token/exchange')
+    public async exchangeClientAccessTokenFromCode(
+        @Body('code') code: string,
+        @Body('clientId') clientId?: string,
     ) {
-        return await this.endpointService.getRefreshedToken(refreshToken, clientId);
+        return await this.endpointService.exchangeClientAccessTokenFromCode(code, clientId);
+    }
+
+    @Post('/token/refresh')
+    public async refreshClientAccessTokenByRefreshToken(
+        @Body('refreshToken') refreshToken: string,
+        @Body('clientId') clientId: string,
+    ) {
+        return await this.endpointService.refreshClientAccessTokenByRefreshToken(refreshToken, clientId);
     }
 
     @Get('/profile')

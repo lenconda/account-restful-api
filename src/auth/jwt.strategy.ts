@@ -14,25 +14,26 @@ import * as _ from 'lodash';
 import {
     ERR_AUTH_EMAIL_NOT_VERIFIED,
 } from 'src/app.constants';
-import * as fs from 'fs-extra';
-import { Oauth2Service } from 'src/oauth2/oauth2.service';
-import { UserService } from 'src/user/user.service';
-import { UtilService } from 'src/util/util.service';
+import { passportJwtSecret } from 'jwks-rsa';
+import { AuthService } from './auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(BaseStrategy) {
     public constructor(
         private readonly configService: ConfigService,
-        private readonly oauth2Service: Oauth2Service,
-        private readonly userService: UserService,
-        private readonly utilService: UtilService,
+        private readonly authService: AuthService,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             audience: configService.get<string>('auth.audience'),
             issuer: configService.get<string>('sign.issuer'),
-            algorithms: ['RS256'],
-            secretOrKey: fs.readFileSync(configService.get<string>('sign.publicKeyPathname')),
+            algorithms: ['HS256'],
+            secretOrKeyProvider: passportJwtSecret({
+                cache: true,
+                rateLimit: true,
+                jwksRequestsPerMinute: 5,
+                jwksUri: `${configService.get('auth.protocol').toLowerCase()}://${configService.get('auth.domain')}/.well-known/jwks.json`,
+            }),
         });
     }
 
@@ -43,8 +44,8 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
             throw new UnauthorizedException();
         }
 
-        const userInfo = await this.oauth2Service
-            .getClient()
+        const userInfo = await this.authService
+            .getOAuth2Client()
             .retrieveUser(id)
             .then((response) => response.response?.user);
 
@@ -56,7 +57,7 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
             throw new ForbiddenException(ERR_AUTH_EMAIL_NOT_VERIFIED);
         }
 
-        const currentUserDTO = this.userService.getUserDTOFromOAuth2ServerResponse(userInfo);
+        const currentUserDTO = this.authService.getUserDTOFromOAuth2ServerResponse(userInfo);
 
         return currentUserDTO;
     }
