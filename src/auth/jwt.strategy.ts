@@ -57,8 +57,6 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
             throw new ForbiddenException(ERR_AUTH_EMAIL_NOT_VERIFIED);
         }
 
-        const currentUserDTO = this.authService.getUserDTOFromOAuth2ServerResponse(userInfo);
-
-        return currentUserDTO;
+        return userInfo;
     }
 }

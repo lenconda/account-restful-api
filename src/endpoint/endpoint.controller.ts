@@ -37,12 +37,4 @@ export class EndpointController {
     ) {
         return await this.endpointService.refreshClientAccessTokenByRefreshToken(refreshToken, clientId);
     }
-
-    @Get('/profile')
-    public async getUserProfileForClient(
-        @Query('id') id: string,
-        @Query('key') apiKey: string,
-    ) {
-        return await this.endpointService.getUserProfileForClient(id, apiKey);
-    }
 }
