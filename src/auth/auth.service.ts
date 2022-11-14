@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
-import { ERR_SIGN_KEY_NOT_FOUND } from 'src/app.constants';
+import { ERR_SIGN_KEY_NOT_FOUND, ERR_SIGN_PAYLOAD_NOT_FOUND } from 'src/app.constants';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import FusionAuthClient from '@fusionauth/typescript-client';
@@ -77,7 +77,11 @@ export class AuthService {
                         reject(error);
                     }
 
-                    resolve(payload);
+                    if (typeof payload === 'string') {
+                        reject(new Error(ERR_SIGN_PAYLOAD_NOT_FOUND));
+                    } else {
+                        resolve(payload);
+                    }
                 },
             );
         });

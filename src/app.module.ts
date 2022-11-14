@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -9,7 +8,6 @@ import { AppInterceptor } from './app.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UtilModule } from './util/util.module';
 import { EndpointModule } from './endpoint/endpoint.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
 
 // Application configs
 import appConfig from './config/app.config';
@@ -31,10 +29,6 @@ import signConfig from './config/sign.config';
         UserModule,
         UtilModule,
         EndpointModule,
-        ServeStaticModule.forRoot({
-            rootPath: path.resolve(__dirname, '../static'),
-            serveRoot: '/',
-        }),
     ],
     controllers: [AppController],
     providers: [

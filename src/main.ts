@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import getSignConfig from './config/sign.config';
 import { generateKeyPairSync } from 'crypto';
 import * as fs from 'fs-extra';
+import * as path from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 const createKeyPair = (signConfig: ReturnType<typeof getSignConfig>) => {
     const {
@@ -39,9 +41,11 @@ const createKeyPair = (signConfig: ReturnType<typeof getSignConfig>) => {
 
 async function bootstrap() {
     createKeyPair(getSignConfig());
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
     const configService = app.get<ConfigService>(ConfigService);
     app.setGlobalPrefix('/api/v1');
+    app.setBaseViewsDir(path.join(__dirname, '..', 'templates'));
+    app.setViewEngine('ejs');
     app.enableCors();
     await app.listen(
         configService.get<number>('app.port'),
