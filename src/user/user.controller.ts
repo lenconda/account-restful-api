@@ -17,13 +17,13 @@ export class UserController {
         private readonly userService: UserService,
     ) {}
 
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('jwt'))
     @Get('/profile')
     public getUserProfile(@CurrentUser() user) {
         return user;
     }
 
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('jwt'))
     @Patch('/profile')
     public async updateUserProfile(
         @CurrentUser() user: UserDTO,
@@ -36,7 +36,7 @@ export class UserController {
         );
     }
 
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('jwt'))
     @Put('/password')
     public async changeUserPassword(@CurrentUser() user: UserDTO) {
         const email = user.email;

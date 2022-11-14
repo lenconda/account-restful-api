@@ -5,17 +5,13 @@ import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import FusionAuthClient from '@fusionauth/typescript-client';
 import * as JwksClient from 'jwks-rsa';
-import { UtilService } from 'src/util/util.service';
+import * as fs from 'fs-extra';
 
 @Injectable()
 export class AuthService {
     private client: FusionAuthClient;
 
-
-    public constructor(
-        private readonly configService: ConfigService,
-        private readonly utilService: UtilService,
-    ) {
+    public constructor(private readonly configService: ConfigService) {
         this.client = new FusionAuthClient(
             this.configService.get('auth.apiKey'),
             `${this.configService.get('auth.protocol').toLowerCase()}://${this.configService.get('auth.domain')}`,
@@ -26,7 +22,18 @@ export class AuthService {
         return this.client;
     }
 
-    public async validateOauth2AccessToken(
+    public async handleExchangeLogin(clientId: string, handoverAccessToken: string) {
+        const {
+            sub: userId,
+        } = await this.validateOauth2AccessToken(handoverAccessToken, clientId);
+        return this.signLTACToken(userId);
+    }
+
+    public handleRefreshLTACToken(userId: string) {
+        return this.signLTACToken(userId);
+    }
+
+    private async validateOauth2AccessToken(
         accessToken: string,
         audience: string | string[],
     ): Promise<jwt.JwtPayload> {
@@ -73,5 +80,31 @@ export class AuthService {
                 },
             );
         });
+    }
+
+    private signLTACToken(userId: string) {
+        const privateKey = fs.readFileSync(this.configService.get('sign.privateKeyPathname'));
+
+        if (!userId || !privateKey) {
+            return null;
+        }
+
+        const accessToken = jwt.sign(
+            {
+                sub: userId,
+            },
+            privateKey,
+            {
+                algorithm: 'RS256',
+                audience: this.configService.get('auth.audience'),
+                expiresIn: this.configService.get('sign.expiration'),
+                issuer: this.configService.get('sign.issuer'),
+            },
+        );
+
+        return {
+            accessToken,
+            expiresIn: this.configService.get('sign.expiration'),
+        };
     }
 }

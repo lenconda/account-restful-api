@@ -14,8 +14,8 @@ import * as _ from 'lodash';
 import {
     ERR_AUTH_EMAIL_NOT_VERIFIED,
 } from 'src/app.constants';
-import { passportJwtSecret } from 'jwks-rsa';
 import { AuthService } from './auth.service';
+import * as fs from 'fs-extra';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(BaseStrategy) {
@@ -27,13 +27,8 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             audience: configService.get<string>('auth.audience'),
             issuer: configService.get<string>('sign.issuer'),
-            algorithms: ['HS256'],
-            secretOrKeyProvider: passportJwtSecret({
-                cache: true,
-                rateLimit: true,
-                jwksRequestsPerMinute: 5,
-                jwksUri: `${configService.get('auth.protocol').toLowerCase()}://${configService.get('auth.domain')}/.well-known/jwks.json`,
-            }),
+            algorithms: ['RS256'],
+            secretOrKey: fs.readFileSync(configService.get<string>('sign.publicKeyPathname')),
         });
     }
 

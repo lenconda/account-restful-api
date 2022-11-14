@@ -44,14 +44,14 @@ export class EndpointService {
             )
             .then((response) => {
                 const {
-                    access_token,
-                    refresh_token,
-                    expires_in,
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                    expires_in: expiresIn,
                 } = response.response;
                 return {
-                    access_token,
-                    refresh_token,
-                    expires_in,
+                    accessToken,
+                    refreshToken,
+                    expiresIn,
                 };
             });
 

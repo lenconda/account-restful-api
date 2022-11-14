@@ -7,23 +7,21 @@ import * as _ from 'lodash';
 import { UserDTO } from './dto/user.dto';
 import { UserRequest } from '@fusionauth/typescript-client';
 import { ERR_FORGOT_PASSWORD_FLOW_FAILED } from 'src/app.constants';
-import { UtilService } from 'src/util/util.service';
 import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
     public constructor(
         private readonly authService: AuthService,
-        private readonly utilService: UtilService,
     ) {}
 
     /**
      * update user information
-     * @param {string} openId user open id
+     * @param {string} userId user open id
      * @param {Partial<UserDTO>} updates the data to be updated
      * @returns {Promise<UserDTO>}
      */
-    public async updateUserInformation(email: string, openId: string, updates: Partial<UserDTO>) {
+    public async updateUserInformation(email: string, userId: string, updates: Partial<UserDTO>) {
         const userPatchData: Partial<Omit<UserDTO, 'id'>> = _.pick(
             updates,
             [
@@ -38,7 +36,7 @@ export class UserService {
 
         const result = await this.authService
             .getOAuth2Client()
-            .updateUser(openId, {
+            .updateUser(userId, {
                 user: {
                     ...userPatchData,
                     email: userPatchData.email || email,
