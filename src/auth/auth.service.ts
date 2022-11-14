@@ -22,7 +22,8 @@ export class AuthService {
         return this.client;
     }
 
-    public async handleExchangeLogin(clientId: string, handoverAccessToken: string) {
+    public async handleExchangeLogin(handoverAccessToken: string) {
+        const clientId = this.configService.get<string>('auth.clientId');
         const {
             sub: userId,
         } = await this.validateOauth2AccessToken(handoverAccessToken, clientId);

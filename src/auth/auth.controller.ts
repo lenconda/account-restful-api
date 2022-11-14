@@ -16,11 +16,8 @@ export class AuthController {
     ) {}
 
     @Post('/login')
-    public async handleLogin(
-        @Body('clientId') clientId: string,
-        @Body('accessToken') handoverAccessToken: string,
-    ) {
-        return await this.authService.handleExchangeLogin(clientId, handoverAccessToken);
+    public async handleLogin(@Body('accessToken') handoverAccessToken: string) {
+        return await this.authService.handleExchangeLogin(handoverAccessToken);
     }
 
     @Post('/refresh')

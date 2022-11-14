@@ -33,7 +33,7 @@ import signConfig from './config/sign.config';
         EndpointModule,
         ServeStaticModule.forRoot({
             rootPath: path.resolve(__dirname, '../static'),
-            serveRoot: '/endpoints',
+            serveRoot: '/',
         }),
     ],
     controllers: [AppController],

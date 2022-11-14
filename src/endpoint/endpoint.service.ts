@@ -86,7 +86,7 @@ export class EndpointService {
                 .getOAuth2Client()
                 .exchangeOAuthCodeForAccessToken(
                     code,
-                    clientId,
+                    clientId || ltacClientId,
                     clientSecret,
                     this.configService.get('auth.defaultRedirectUri'),
                 );
