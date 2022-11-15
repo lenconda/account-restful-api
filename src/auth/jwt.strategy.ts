@@ -11,16 +11,14 @@ import {
 } from 'passport-jwt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as _ from 'lodash';
-import {
-    ERR_AUTH_EMAIL_NOT_VERIFIED,
-} from 'src/app.constants';
+import { ERR_AUTH_EMAIL_NOT_VERIFIED } from 'src/app.constants';
 import { AuthService } from './auth.service';
 import * as fs from 'fs-extra';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(BaseStrategy) {
     public constructor(
-        private readonly configService: ConfigService,
+        configService: ConfigService,
         private readonly authService: AuthService,
     ) {
         super({

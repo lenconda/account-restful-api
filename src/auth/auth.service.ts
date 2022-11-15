@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
-import { ERR_SIGN_KEY_NOT_FOUND, ERR_SIGN_PAYLOAD_NOT_FOUND } from 'src/app.constants';
+import {
+    ERR_SIGN_KEY_NOT_FOUND,
+    ERR_SIGN_PAYLOAD_NOT_FOUND,
+} from 'src/app.constants';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import FusionAuthClient from '@fusionauth/typescript-client';
@@ -69,7 +72,7 @@ export class AuthService {
                 },
                 {
                     audience,
-                    algorithms: ['HS256'],
+                    algorithms: ['RS256'],
                     issuer: this.configService.get('auth.jwtIssuer'),
                 },
                 (error, payload) => {

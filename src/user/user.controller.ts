@@ -17,7 +17,7 @@ export class UserController {
         private readonly userService: UserService,
     ) {}
 
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard())
     @Get('/profile')
     public getUserProfile(@CurrentUser() user) {
         return user;
