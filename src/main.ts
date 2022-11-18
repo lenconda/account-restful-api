@@ -1,11 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import getSignConfig from './config/sign.config';
+import getAppConfig from './config/app.config';
 import { generateKeyPairSync } from 'crypto';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import {
+    ExpressAdapter,
+    NestExpressApplication,
+} from '@nestjs/platform-express';
+import { NestFactoryStatic } from '@nestjs/core/nest-factory';
 
 const createKeyPair = (signConfig: ReturnType<typeof getSignConfig>) => {
     const {
@@ -41,15 +44,18 @@ const createKeyPair = (signConfig: ReturnType<typeof getSignConfig>) => {
 
 async function bootstrap() {
     createKeyPair(getSignConfig());
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    const configService = app.get<ConfigService>(ConfigService);
-    app.setGlobalPrefix('/api/v1');
-    app.setBaseViewsDir(path.join(__dirname, '..', 'templates'));
-    app.setViewEngine('ejs');
-    app.enableCors();
-    await app.listen(
-        configService.get<number>('app.port'),
-        configService.get<string>('app.host'),
-    );
+    const {
+        port,
+        host,
+    } = getAppConfig();
+    const server = new ExpressAdapter();
+
+    const apiFactory = new NestFactoryStatic();
+    const apiModule = await apiFactory.create<NestExpressApplication>(AppModule, server);
+    apiModule.setGlobalPrefix('/api/v1');
+    apiModule.enableCors();
+    await apiModule.init();
+
+    await server.listen(port, host);
 }
 bootstrap();
