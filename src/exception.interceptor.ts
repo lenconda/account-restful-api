@@ -5,30 +5,29 @@ import {
     ExecutionContext,
     CallHandler,
     HttpException,
-    InternalServerErrorException,
+    Logger,
 } from '@nestjs/common';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ERR_HTTP_SERVER_ERROR } from './app.constants';
 
 export type Response = Record<string, any>;
 
 @Injectable()
-export class AppInterceptor<T> implements NestInterceptor<T, Response> {
+export class ExceptionInterceptor<T> implements NestInterceptor<T, Response> {
+    private logger = new Logger('AppInterceptor');
+
     public async intercept(
         context: ExecutionContext,
         next: CallHandler,
     ): Promise<Observable<Response>> {
         return next.handle().pipe(
             catchError((e) => {
-                console.log(e);
-                if (e instanceof HttpException) {
-                    throw e;
-                } else if (e instanceof ClientResponse) {
-                    throw new HttpException(JSON.stringify(e.exception), e.statusCode);
+                this.logger.error((e.message || e.toString()) + ': ' + JSON.stringify(e.response));
+                if (e instanceof ClientResponse) {
+                    throw new HttpException(e.response, e.statusCode);
                 } else {
-                    throw new InternalServerErrorException(ERR_HTTP_SERVER_ERROR, e.message || e.toString());
+                    throw e;
                 }
             }),
         );

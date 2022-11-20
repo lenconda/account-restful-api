@@ -4,7 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { AppInterceptor } from './app.interceptor';
+import { ExceptionInterceptor } from './exception.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UtilModule } from './util/util.module';
 import { EndpointModule } from './endpoint/endpoint.module';
@@ -35,7 +35,7 @@ import signConfig from './config/sign.config';
         AppService,
         {
             provide: APP_INTERCEPTOR,
-            useClass: AppInterceptor,
+            useClass: ExceptionInterceptor,
         },
     ],
 })
