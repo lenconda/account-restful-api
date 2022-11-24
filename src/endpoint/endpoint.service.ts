@@ -1,4 +1,7 @@
 import {
+    HttpException,
+    HttpStatus,
+    Inject,
     Injectable,
     InternalServerErrorException,
 } from '@nestjs/common';
@@ -9,12 +12,20 @@ import {
 } from 'src/app.constants';
 import * as _ from 'lodash';
 import { AuthService } from 'src/auth/auth.service';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 
 @Injectable()
 export class EndpointService {
     public constructor(
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
+        /**
+         * TODO remove
+         * @test
+         */
+        @Inject(REQUEST)
+        private readonly request: Request,
     ) {}
 
     /**
@@ -111,5 +122,25 @@ export class EndpointService {
         } catch (e) {
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
         }
+    }
+
+    /**
+     * TODO remove
+     * @test
+     */
+    public async test() {
+        const {
+            params,
+            query,
+            url,
+        } = this.request;
+        throw new HttpException(
+            {
+                params,
+                query,
+                url,
+            },
+            HttpStatus.BAD_REQUEST,
+        );
     }
 }

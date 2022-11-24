@@ -5,6 +5,8 @@ import {
     Get,
     Query,
     Param,
+    HttpException,
+    HttpStatus,
 } from '@nestjs/common';
 import { EndpointService } from './endpoint.service';
 
@@ -20,6 +22,15 @@ export class EndpointController {
         @Param('client_id') clientId?: string,
     ) {
         return {};
+    }
+
+    /**
+     * TODO remove
+     * @test
+     */
+    @Get('/test/:id')
+    public async test() {
+        return await this.endpointService.test();
     }
 
     @Post('/token/exchange')
