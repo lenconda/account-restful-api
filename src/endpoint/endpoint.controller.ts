@@ -5,8 +5,6 @@ import {
     Get,
     Query,
     Param,
-    HttpException,
-    HttpStatus,
 } from '@nestjs/common';
 import { EndpointService } from './endpoint.service';
 
