@@ -5,6 +5,7 @@ import {
     Get,
     Query,
     Param,
+    Render,
 } from '@nestjs/common';
 import { EndpointService } from './endpoint.service';
 
@@ -15,20 +16,12 @@ export class EndpointController {
     ) {}
 
     @Get('/handover/:client_id?')
+    @Render('handover')
     public async handoverAuthentication(
         @Query('code') code: string,
         @Param('client_id') clientId?: string,
     ) {
-        return {};
-    }
-
-    /**
-     * TODO remove
-     * @test
-     */
-    @Get('/test/:id')
-    public async test() {
-        return await this.endpointService.test();
+        return await this.endpointService.handleHandoverAuthentication(code, clientId);
     }
 
     @Post('/token/exchange')

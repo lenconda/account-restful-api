@@ -1,6 +1,4 @@
 import {
-    HttpException,
-    HttpStatus,
     Inject,
     Injectable,
     InternalServerErrorException,
@@ -27,6 +25,18 @@ export class EndpointService {
         @Inject(REQUEST)
         private readonly request: Request,
     ) {}
+
+    public async handleHandoverAuthentication(
+        code: string,
+        clientId = this.configService.get<string>('auth.clientId'),
+    ) {
+        const appConfig = this.configService.get('app') || {};
+        return {
+            ...appConfig,
+            code,
+            clientId,
+        };
+    }
 
     /**
      * refresh access token use refresh token
@@ -122,25 +132,5 @@ export class EndpointService {
         } catch (e) {
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
         }
-    }
-
-    /**
-     * TODO remove
-     * @test
-     */
-    public async test() {
-        const {
-            params,
-            query,
-            url,
-        } = this.request;
-        throw new HttpException(
-            {
-                params,
-                query,
-                url,
-            },
-            HttpStatus.BAD_REQUEST,
-        );
     }
 }

@@ -7,6 +7,83 @@
     <title>Logging in | LencondaTop Account Center</title>
 </head>
 <body>
-    <div class="container"></div>
+    <div id="status"></div>
 </body>
+<script>
+    window.onload = function() {
+        var code = '<%= code %>';
+        var clientId = '<%= clientId %>';
+        var domain = '<%= domain %>';
+        var url = 'https://' + domain + '/api/v1/endpoint/token/exchange';
+        var exchangeAccessTokenRequest = new XMLHttpRequest();
+        var statusElement = document.getElementById('status');
+
+        exchangeAccessTokenRequest.onreadystatechange = function() {
+            if (this.readyState === 4) {
+                if (this.status >= 300) {
+                    console.warn(this.response);
+                    return;
+                }
+
+                var response;
+
+                try {
+                    response = JSON.parse(this.responseText);
+                } catch (e) {
+                    console.warn(e);
+                }
+
+                if (!response) {
+                    statusElement.innerText = 'Log in failed';
+                    setTimeout(() => {
+                        window.close();
+                    }, 5000);
+                    return;
+                }
+
+                var accessToken = response.accessToken;
+                var refreshToken = response.refreshToken;
+                var expiresIn = response.expiresIn;
+                var redirectUrl;
+
+                try {
+                    window.location.search.replace(/^\?/g, '')
+                        .split('&')
+                        .find(function(item) {
+                            return item.split('=')[0] === 'state';
+                        });
+                    if (redirectUrl) {
+                        var base64EncodedUrl = redirectUrl.split('=')[1];
+                        redirectUrl = window.atob(base64EncodedUrl);
+                    }
+                } catch (e) {}
+
+                statusElement.innerText = 'Logged in successfully, redirecting...';
+
+                if (accessToken) {
+                    localStorage.setItem('ltac:access_token', accessToken);
+                }
+
+                if (refreshToken) {
+                    localStorage.setItem('ltac:refresh_token', refreshToken);
+                }
+
+                if (expiresIn && typeof expiresIn === 'number') {
+                    localStorage.setItem('ltac:expired_date', new Date(Date.now() + expiresIn * 1000).toISOString());
+                }
+
+                window.location.href = redirectUrl || '/';
+            }
+        }
+
+        statusElement.innerText = 'Logging in ...';
+        exchangeAccessTokenRequest.overrideMimeType('application/json; charset=utf-8');
+        exchangeAccessTokenRequest.open('POST', url, true);
+        exchangeAccessTokenRequest.setRequestHeader("Content-Type", "application/json");
+        exchangeAccessTokenRequest.send(JSON.stringify({
+            code,
+            clientId,
+        }));
+    }
+</script>
 </html>
