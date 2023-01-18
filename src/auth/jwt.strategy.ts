@@ -26,6 +26,7 @@ export class JwtStrategy extends PassportStrategy(BaseStrategy) {
             audience: configService.get<string>('auth.audience'),
             issuer: configService.get<string>('sign.issuer'),
             algorithms: ['RS256'],
+            ignoreExpiration: process.env.NODE_ENV === 'development',
             secretOrKey: fs.readFileSync(configService.get<string>('sign.publicKeyPathname')),
         });
     }

@@ -122,7 +122,7 @@ typings/
 
 # dotenv environment variables file
 .env
-.env.test
+.env.*
 
 # Nest build output
 dist/

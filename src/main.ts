@@ -1,46 +1,26 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import getSignConfig from './config/sign.config';
-import { generateKeyPairSync } from 'crypto';
-import * as fs from 'fs-extra';
 import * as path from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as dotenv from 'dotenv';
 
-const createKeyPair = (signConfig: ReturnType<typeof getSignConfig>) => {
-    const {
-        keyPairPathname,
-        publicKeyPathname,
-        privateKeyPathname,
-    } = signConfig;
+const remixEnv = () => {
+    if (typeof process.env.NODE_ENV !== 'string') {
+        return;
+    }
 
-    const {
-        publicKey,
-        privateKey,
-    } = generateKeyPairSync('rsa', {
-        modulusLength: 4096,
-        publicKeyEncoding: {
-            type: 'spki',
-            format: 'pem',
-        },
-        privateKeyEncoding: {
-            type: 'pkcs8',
-            format: 'pem',
-        },
+    const modeSpecifiedEnv = dotenv.config({
+        path: path.join(process.cwd(), `.env.${process.env.NODE_ENV.toLowerCase()}`),
     });
 
-    if (!fs.existsSync(keyPairPathname)) {
-        fs.mkdirpSync(keyPairPathname);
-    }
-
-    if (!fs.existsSync(publicKeyPathname) || !fs.existsSync(privateKeyPathname)) {
-        fs.writeFileSync(publicKeyPathname, publicKey);
-        fs.writeFileSync(privateKeyPathname, privateKey);
-    }
+    Object.assign(process.env, {
+        ...(modeSpecifiedEnv?.parsed || {}),
+    });
 };
 
 async function bootstrap() {
-    createKeyPair(getSignConfig());
+    remixEnv();
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     const configService = app.get<ConfigService>(ConfigService);
     app.setGlobalPrefix('/api/v1');
