@@ -130,6 +130,7 @@ export class EndpointService {
                 tokenType,
             };
         } catch (e) {
+	    console.log(e);
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
         }
     }
