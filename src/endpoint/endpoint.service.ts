@@ -1,7 +1,7 @@
 import {
-    Inject,
     Injectable,
     InternalServerErrorException,
+    Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -10,20 +10,15 @@ import {
 } from 'src/app.constants';
 import * as _ from 'lodash';
 import { AuthService } from 'src/auth/auth.service';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
+import * as ejs from 'ejs';
 
 @Injectable()
 export class EndpointService {
+    private readonly logger = new Logger(EndpointService.name);
+
     public constructor(
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
-        /**
-         * TODO remove
-         * @test
-         */
-        @Inject(REQUEST)
-        private readonly request: Request,
     ) {}
 
     public async handleHandoverAuthentication(
@@ -103,13 +98,19 @@ export class EndpointService {
         }
 
         try {
+            const redirectUri = ejs.render(this.configService.get('auth.redirectUriScheme'), {
+                clientId: clientId || ltacClientId,
+            });
+
+            this.logger.log(`OAuth2 exchange, code: ${code}, client ID: ${clientId || ltacClientId}, redirect URI: ${redirectUri}`);
+
             const result = await this.authService
                 .getOAuth2Client()
                 .exchangeOAuthCodeForAccessToken(
                     code,
                     clientId || ltacClientId,
                     clientSecret,
-                    this.configService.get('auth.defaultRedirectUri'),
+                    redirectUri,
                 );
 
             const {
@@ -130,7 +131,7 @@ export class EndpointService {
                 tokenType,
             };
         } catch (e) {
-	    console.log(e);
+	        this.logger.error('OAuth2 Error: ' + JSON.stringify(e?.exception));
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
         }
     }

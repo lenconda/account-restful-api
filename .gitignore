@@ -132,3 +132,6 @@ coverage/
 
 # Key pairs
 .keys/
+
+# Log files
+logs/

@@ -12,7 +12,7 @@ export default registerAs('auth', () => {
         // connection: process.env.OAUTH2_CONNECTION,
         tokenEndpoint: process.env.OAUTH2_TOKEN_ENDPOINT,
         apiKey: process.env.OAUTH2_TENANT_API_KEY,
-        defaultRedirectUri: process.env.OAUTH2_DEFAULT_REDIRECT_URI,
         jwtIssuer: process.env.OAUTH2_JWT_ISSUER,
+        redirectUriScheme: process.env.OAUTH2_REDIRECT_URI_SCHEME,
     };
 });

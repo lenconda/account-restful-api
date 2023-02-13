@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import * as path from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as dotenv from 'dotenv';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 const remixEnv = () => {
     if (typeof process.env.NODE_ENV !== 'string') {
@@ -27,6 +28,9 @@ async function bootstrap() {
     app.setBaseViewsDir(path.join(__dirname, '..', 'templates'));
     app.setViewEngine('ejs');
     app.enableCors();
+    if (process.env.NODE_ENV !== 'development') {
+        app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    }
     await app.listen(
         configService.get<number>('app.port'),
         configService.get<string>('app.host'),
