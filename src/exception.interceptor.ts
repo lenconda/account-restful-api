@@ -23,7 +23,7 @@ export class ExceptionInterceptor<T> implements NestInterceptor<T, Response> {
     ): Promise<Observable<Response>> {
         return next.handle().pipe(
             catchError((e) => {
-                this.logger.error((e.message || e.toString()) + ': ' + JSON.stringify(e.response));
+                this.logger.error(e + e?.stack);
                 if (e instanceof ClientResponse) {
                     throw new HttpException(e.response, e.statusCode);
                 } else {

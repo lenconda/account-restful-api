@@ -76,7 +76,9 @@
                     localStorage.setItem('ltac:expired_date', new Date(Date.now() + expiresIn * 1000).toISOString());
                 }
 
-                window.location.href = redirectUrl || '/';
+                setTimeout(() => {
+                    window.location.href = redirectUrl || '/';
+                }, 3000);
             }
         }
 

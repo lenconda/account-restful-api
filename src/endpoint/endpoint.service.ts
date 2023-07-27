@@ -116,7 +116,6 @@ export class EndpointService {
                     clientSecret,
                     redirectUri,
                 );
-
             const {
                 expires_in: expiresIn,
                 access_token: accessToken,
@@ -125,8 +124,7 @@ export class EndpointService {
                 token_type: tokenType,
                 userId,
             } = result.response;
-
-            return {
+            const data = {
                 accessToken,
                 refreshToken,
                 expiresIn,
@@ -134,6 +132,10 @@ export class EndpointService {
                 userId,
                 tokenType,
             };
+
+            this.logger.log('EXCHANGE:' + JSON.stringify(data));
+
+            return data;
         } catch (e) {
 	        this.logger.error('OAuth2 Error: ' + JSON.stringify(e?.exception));
             throw new InternalServerErrorException(ERR_AUTH_INVALID_GRANT, e.message || e.toString());
