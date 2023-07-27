@@ -22,6 +22,7 @@
             if (this.readyState === 4) {
                 if (this.status >= 300) {
                     console.warn(this.response);
+                    statusElement.innerText = 'Login failed: ' + this.response;
                     return;
                 }
 
@@ -30,6 +31,7 @@
                 try {
                     response = JSON.parse(this.responseText);
                 } catch (e) {
+                    statusElement.innerText = 'Login failed: ' + e;
                     console.warn(e);
                 }
 
@@ -56,7 +58,9 @@
                         var base64EncodedUrl = redirectUrl.split('=')[1];
                         redirectUrl = window.atob(base64EncodedUrl);
                     }
-                } catch (e) {}
+                } catch (e) {
+                    statusElement.innerText = 'Login failed: ' + e;
+                }
 
                 statusElement.innerText = 'Logged in successfully, redirecting...';
 
@@ -76,6 +80,12 @@
             }
         }
 
+        var redirectUri;
+
+        try {
+            redirectUri = window.location.origin + window.location.pathname;
+        } catch (e) {}
+
         statusElement.innerText = 'Logging in ...';
         exchangeAccessTokenRequest.overrideMimeType('application/json; charset=utf-8');
         exchangeAccessTokenRequest.open('POST', url, true);
@@ -83,6 +93,7 @@
         exchangeAccessTokenRequest.send(JSON.stringify({
             code,
             clientId,
+            redirectUri
         }));
     }
 </script>

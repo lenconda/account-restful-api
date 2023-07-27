@@ -74,7 +74,7 @@ export class EndpointService {
         return result;
     }
 
-    public async exchangeClientAccessTokenFromCode(code: string, clientId?: string) {
+    public async exchangeClientAccessTokenFromCode(code: string, clientId?: string, inputRedirectUri?: string) {
         const ltacClientId = this.configService.get('auth.clientId');
         let clientSecret: string;
 
@@ -98,9 +98,13 @@ export class EndpointService {
         }
 
         try {
-            const redirectUri = ejs.render(this.configService.get('auth.redirectUriScheme'), {
-                clientId: clientId || ltacClientId,
-            });
+            let redirectUri = inputRedirectUri;
+
+            if (!redirectUri) {
+                redirectUri = ejs.render(this.configService.get('auth.redirectUriScheme'), {
+                    clientId: clientId || ltacClientId,
+                });
+            }
 
             this.logger.log(`OAuth2 exchange, code: ${code}, client ID: ${clientId || ltacClientId}, redirect URI: ${redirectUri}`);
 

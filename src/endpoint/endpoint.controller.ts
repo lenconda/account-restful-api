@@ -28,8 +28,9 @@ export class EndpointController {
     public async exchangeClientAccessTokenFromCode(
         @Body('code') code: string,
         @Body('clientId') clientId?: string,
+        @Body('redirectUri') redirectUri?: string,
     ) {
-        return await this.endpointService.exchangeClientAccessTokenFromCode(code, clientId);
+        return await this.endpointService.exchangeClientAccessTokenFromCode(code, clientId, redirectUri);
     }
 
     @Post('/token/refresh')
