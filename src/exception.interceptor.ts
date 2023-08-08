@@ -24,6 +24,7 @@ export class ExceptionInterceptor<T> implements NestInterceptor<T, Response> {
         return next.handle().pipe(
             catchError((e) => {
                 this.logger.error(e + e?.stack);
+                console.log(e);
                 if (e instanceof ClientResponse) {
                     throw new HttpException(e.response, e.statusCode);
                 } else {
