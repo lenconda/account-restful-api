@@ -15,7 +15,7 @@ export default registerAs('sign', () => {
         publicKeyPathname: path.resolve(keyPairPathname, publicKeyFilename),
         privateKeyPathname: path.resolve(keyPairPathname, privateKeyFilename),
         passphrase: process.env.SIGN_PASSPHRASE || 'lenconda+account+center',
-        issuer: process.env.SIGN_ISSUER || 'https://account.lenconda.top/',
+        issuer: process.env.SIGN_ISSUER || 'https://account.blitzesty.com/',
         expiration: (
             process.env.SIGN_EXPIRATION
                 ? parseInt(process.env.SIGN_EXPIRATION, 10)
